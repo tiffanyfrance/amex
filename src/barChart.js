@@ -4,12 +4,12 @@ import * as d3 from 'd3';
 class BarChart extends Component {
   
   componentDidMount() {
-    this.drawChart();
+    fetch('http://localhost:8080/getData')
+      .then((response) => response.json())
+      .then((data) => this.drawChart(data));
   }
 
-  drawChart() {
-    const data = this.props.data;
-
+  drawChart(data) {
     const clientWidth = d3.select('body').node().getBoundingClientRect().width;
     const clientHeight = d3.select('body').node().getBoundingClientRect().height;
 
