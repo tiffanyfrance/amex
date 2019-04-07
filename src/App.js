@@ -125,7 +125,7 @@ class App extends Component {
       }
     ],
     width: 800,
-    height: 300
+    height: 400
   }
 
   render() {
