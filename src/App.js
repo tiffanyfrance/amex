@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import Histogram from './histogram.js';
+import BarChart from './barChart.js';
 
 class App extends Component {
 
@@ -61,7 +62,7 @@ class App extends Component {
       {dtg: '01-04-2011', value: 3.8},
       {dtg: '01-04-2011', value: 4.2}
     ],
-    data1: [
+    barChartData: [
       {
         "item": "unicycles",
         "average unit price": "$100",
@@ -123,7 +124,7 @@ class App extends Component {
         "revenue total": "$1,560"
       }
     ],
-    width: 450,
+    width: 800,
     height: 300
   }
 
@@ -135,7 +136,9 @@ class App extends Component {
             Tiffany France - D3 React Example
           </p>
 
-          <Histogram data={this.products.data} data1={this.products.data1} width={this.products.width} height={this.products.height}  />
+          {/*<Histogram data={this.products.data} width={this.products.width} height={this.products.height}  />*/}
+        
+          <BarChart data={this.products.barChartData} width={this.products.width} height={this.products.height} />
         
         </header>
       </div>

@@ -9,7 +9,6 @@ class Histogram extends Component {
 
   drawChart() {
     const data = this.props.data;
-    const data1 = this.props.data1;
 
     const margin = {top: 10, right: 30, bottom: 30, left: 40},
           width = this.props.width - margin.left - margin.right,
@@ -41,10 +40,10 @@ class Histogram extends Component {
     
     data.forEach((d) => d.date = parseDate(d.dtg));
 
-    data1.forEach((d) => {
-      d['average unit price'] = +d['average unit price'].replace(/\$|,/g, '');
-      d['revenue total'] = +d['revenue total'].replace(/\$|,/g, '');
-    });
+    // data1.forEach((d) => {
+    //   d['average unit price'] = +d['average unit price'].replace(/\$|,/g, '');
+    //   d['revenue total'] = +d['revenue total'].replace(/\$|,/g, '');
+    // });
 
     let bins = histogram(data);
 
