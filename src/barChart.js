@@ -10,49 +10,47 @@ class BarChart extends Component {
   drawChart() {
     const data = this.props.data;
 
+    const clientWidth = d3.select('body').node().getBoundingClientRect().width;
+    const clientHeight = d3.select('body').node().getBoundingClientRect().height;
+
     const margin = {top: 30, right: 30, bottom: 30, left: 80},
-          width = this.props.width - margin.left - margin.right,
-          height = this.props.height - margin.top - margin.bottom;
+          width = clientWidth - margin.left - margin.right,
+          height = (clientHeight * 0.75) - margin.top - margin.bottom;
+
+    let svg = d3.select('#barChart')
+        .append('svg')
+        .attr('width', width + margin.top + margin.bottom)
+        .attr('height', height + margin.left + margin.right)
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
     data.forEach((d) => {
       d.price = +d['average unit price'].replace(/\$|,/g, '');
       d.revenue = +d['revenue total'].replace(/\$|,/g, '');
     });
 
+    if (clientWidth < 700) {
 
-    let client = window.innerWidth
-    || document.documentElement.clientWidth
-    || document.body.clientWidth;
-
-    if (client < 500) {
-
-      let newWidth = 300; //get this off the window 
-      let newHeight = 400; //get this off the window
       //horizontal view
-      let svg = d3.select('#barChart')
-        .append('svg')
-        .attr('width', newWidth + margin.top + margin.bottom)
-        .attr('height', newHeight + margin.left + margin.right)
-        .append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
       let x = d3.scaleLinear()
-          .range([0, newWidth]),
+          .range([0, (width - margin.right)]),
         y = d3.scaleBand()
-          .rangeRound([newHeight, 0])
+          .rangeRound([height, 0])
           .padding(0.1);
 
       x.domain([0, d3.max(data, (d) => d.price)]);
       y.domain(data.map((d) => d.item));
 
-      let xAxis = svg.append('g')
+      //xAxis
+      svg.append('g')
           .attr('class', 'axis axis--x')
           .call(d3.axisTop(x).ticks(10))
           .append('text')
           .attr('text-anchor', 'middle')
           .text('price');
 
-      let yAxis = svg.append('g')
+      //yAxis
+      svg.append('g')
           .attr('class', 'axis axis--y')
           .call(d3.axisLeft(y));
 
@@ -69,14 +67,7 @@ class BarChart extends Component {
 
     } else {
 
-      //vertical view
-      let svg = d3.select('#barChart')
-        .append('svg')
-        .attr('width', width + margin.left + margin.right)
-        .attr('height', height + margin.top + margin.bottom)
-        .append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
+      //default view
       let x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
         y = d3.scaleLinear().rangeRound([height, 0]);
 
@@ -92,10 +83,6 @@ class BarChart extends Component {
           .attr('class', 'axis axis--y')
           .call(d3.axisLeft(y).ticks(10))
           .append('text')
-          .attr('transform', 'rotate(-90)')
-          .attr('y', 6)
-          .attr('dy', '0.71em')
-          .attr('text-anchor', 'end')
           .text('price');
 
       svg.selectAll('.bar')
@@ -108,8 +95,6 @@ class BarChart extends Component {
           .attr('width', x.bandwidth())
           .attr('height', (d) => height - y(d.price))
           .attr('fill', 'steelblue');
-
-
     }
 
 
