@@ -30,74 +30,61 @@ class BarChart extends Component {
     });
 
     if (clientWidth < 700) {
-
       //horizontal view
-      let x = d3.scaleLinear()
-          .range([0, (width - margin.right)]),
-        y = d3.scaleBand()
-          .rangeRound([height, 0])
-          .padding(0.1);
+      let x = d3.scaleLinear().range([0, (width - margin.right)]),
+          y = d3.scaleBand().rangeRound([height, 0]).padding(0.1);
 
       x.domain([0, d3.max(data, (d) => d.price)]);
       y.domain(data.map((d) => d.item));
 
-      //xAxis
-      svg.append('g')
-          .attr('class', 'axis axis--x')
-          .call(d3.axisTop(x).ticks(10))
-          .append('text')
-          .attr('text-anchor', 'middle')
-          .text('price');
-
-      //yAxis
-      svg.append('g')
-          .attr('class', 'axis axis--y')
-          .call(d3.axisLeft(y));
+      buildAxes(x,y);
 
       svg.selectAll('.bar')
         .data(data)
         .enter()
         .append('rect')
-          .attr('class', 'bar')
-          .attr('y', (d) => y(d.item))
-          .attr('x', (d) => 0)
-          .attr('height', y.bandwidth())
-          .attr('width', (d) => x(d.price))
-          .attr('fill', 'steelblue');
+        .attr('class', 'bar')
+        .attr('y', (d) => y(d.item))
+        .attr('x', (d) => 0)
+        .attr('height', y.bandwidth())
+        .attr('width', (d) => x(d.price))
+        .attr('fill', 'steelblue');
 
     } else {
-
       //default view
       let x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
-        y = d3.scaleLinear().rangeRound([height, 0]);
+          y = d3.scaleLinear().rangeRound([height, 0]);
 
       x.domain(data.map((d) => d.item));
       y.domain([0, d3.max(data, (d) => d.price)]);
 
+      buildAxes(x,y);
+
+      svg.selectAll('.bar')
+        .data(data)
+        .enter()
+        .append('rect')
+        .attr('class', 'bar')
+        .attr('x', (d) => x(d.item))
+        .attr('y', (d) => y(d.price))
+        .attr('width', x.bandwidth())
+        .attr('height', (d) => height - y(d.price))
+        .attr('fill', 'steelblue');
+    }
+
+
+    function buildAxes(x,y) {
+      //xAxis
       svg.append('g')
           .attr('class', 'axis axis--x')
           .attr('transform', 'translate(0,' + height + ')')
           .call(d3.axisBottom(x));
 
+      //yAxis
       svg.append('g')
           .attr('class', 'axis axis--y')
-          .call(d3.axisLeft(y).ticks(10))
-          .append('text')
-          .text('price');
-
-      svg.selectAll('.bar')
-        .data(data)
-        .enter()
-        .append('rect')
-          .attr('class', 'bar')
-          .attr('x', (d) => x(d.item))
-          .attr('y', (d) => y(d.price))
-          .attr('width', x.bandwidth())
-          .attr('height', (d) => height - y(d.price))
-          .attr('fill', 'steelblue');
+          .call(d3.axisLeft(y));
     }
-
-
     
 
   // d3.tsv('data.tsv')
