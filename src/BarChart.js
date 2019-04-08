@@ -25,6 +25,26 @@ class BarChart extends Component {
           data
         });
       });
+
+    this.clientWidth = d3.select('body').node().getBoundingClientRect().width;
+    this.clientHeight = d3.select('body').node().getBoundingClientRect().height;
+
+    this.margin = {top: 30, right: 30, bottom: 30, left: 80};
+    this.width = this.clientWidth - this.margin.left - this.margin.right;
+    this.height = (this.clientHeight * 0.75) - this.margin.top - this.margin.bottom;
+
+    this.svg = d3.select(this.chartRef.current)
+        .attr('width', this.width + this.margin.top + this.margin.bottom)
+        .attr('height', this.height + this.margin.left + this.margin.right)
+        .append('g')
+        .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
+
+    this.xAxis = this.svg.append('g')
+        .attr('class', 'axis axis--x')
+        .attr('transform', 'translate(0,' + this.height + ')');
+
+    this.yAxis = this.svg.append('g')
+        .attr('class', 'axis axis--y');
   }
 
   drawChart() {
@@ -34,86 +54,70 @@ class BarChart extends Component {
       return;
     }
 
-    d3.select(this.chartRef.current)
-        .select('svg').remove();
-
-    const clientWidth = d3.select('body').node().getBoundingClientRect().width;
-    const clientHeight = d3.select('body').node().getBoundingClientRect().height;
-
-    const margin = {top: 30, right: 30, bottom: 30, left: 80},
-          width = clientWidth - margin.left - margin.right,
-          height = (clientHeight * 0.75) - margin.top - margin.bottom;
-
-    let svg = d3.select(this.chartRef.current)
-        .append('svg')
-        .attr('width', width + margin.top + margin.bottom)
-        .attr('height', height + margin.left + margin.right)
-        .append('g')
-        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
     let { metric } = this.props;
 
-    if (clientWidth < 700) {
+    if (this.clientWidth < 700) {
       //horizontal view
-      let x = d3.scaleLinear().range([0, (width - margin.right)]),
-          y = d3.scaleBand().rangeRound([height, 0]).padding(0.1);
+      let x = d3.scaleLinear().range([0, (this.width - this.margin.right)]),
+          y = d3.scaleBand().rangeRound([this.height, 0]).padding(0.1);
 
       x.domain([0, d3.max(data, (d) => d[metric])]);
       y.domain(data.map((d) => d.item));
 
-      buildAxes(x,y);
+      this.updateAxes(x,y);
 
-      svg.selectAll('.bar')
-        .data(data)
-        .enter()
-        .append('rect')
-        .attr('class', 'bar')
+      this.mergeBar(data)
+        .attr('fill', 'steelblue')
+        .transition()
+        .duration(500)
         .attr('y', (d) => y(d.item))
         .attr('x', (d) => 0)
         .attr('height', y.bandwidth())
-        .attr('width', (d) => x(d[metric]))
-        .attr('fill', 'steelblue');
+        .attr('width', (d) => x(d[metric]));
 
     } else {
       //default view
-      let x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
-          y = d3.scaleLinear().rangeRound([height, 0]);
+      let x = d3.scaleBand().rangeRound([0, this.width]).padding(0.1),
+          y = d3.scaleLinear().rangeRound([this.height, 0]);
 
       x.domain(data.map((d) => d.item));
       y.domain([0, d3.max(data, (d) => d[metric])]);
 
-      buildAxes(x,y);
+      this.updateAxes(x,y);
 
-      svg.selectAll('.bar')
-        .data(data)
-        .enter()
-        .append('rect')
-        .attr('class', 'bar')
+      this.mergeBar(data)
+        .attr('fill', 'steelblue')
+        .transition()
+        .duration(500)
         .attr('x', (d) => x(d.item))
         .attr('y', (d) => y(d[metric]))
         .attr('width', x.bandwidth())
-        .attr('height', (d) => height - y(d[metric]))
-        .attr('fill', 'steelblue');
+        .attr('height', (d) => this.height - y(d[metric]));
     }
+  }
 
+  updateAxes(x,y) {
+    this.xAxis
+        .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(0));
 
-    function buildAxes(x,y) {
-      //xAxis
-      svg.append('g')
-          .attr('class', 'axis axis--x')
-          .attr('transform', 'translate(0,' + height + ')')
-          .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(0));
+    this.yAxis
+        .call(d3.axisLeft(y).tickSizeOuter(0).tickSize(0));
+  }
 
-      //yAxis
-      svg.append('g')
-          .attr('class', 'axis axis--y')
-          .call(d3.axisLeft(y).tickSizeOuter(0).tickSize(0));
-    }
+  mergeBar(data) {
+    let bar = this.svg.selectAll('.bar')
+        .data(data);
+
+    let enterBar = bar.enter()
+      .append('rect')
+      .attr('class', 'bar');
+
+    return enterBar.merge(bar);
   }
 
   render() {
     return (
-      <div ref={this.chartRef}></div>
+      <svg ref={this.chartRef}></svg>
     )
   }
 
