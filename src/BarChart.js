@@ -26,6 +26,10 @@ class BarChart extends Component {
         });
       });
 
+    this.setupChart();
+  }
+
+  setupChart() {
     this.clientWidth = d3.select('body').node().getBoundingClientRect().width;
     this.clientHeight = d3.select('body').node().getBoundingClientRect().height;
 
