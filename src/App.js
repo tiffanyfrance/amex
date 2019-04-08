@@ -14,7 +14,6 @@ class App extends Component {
   }
 
   metricChange = (event) => {
-    console.log(event.target.value);
     this.setState({
       metric: event.target.value
     })
