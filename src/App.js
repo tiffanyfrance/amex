@@ -76,7 +76,7 @@ class App extends Component {
 
           {/*<Histogram data={this.products.data} width={this.products.width} height={this.products.height}  />*/}
         
-          <BarChart data={this.products.barChartData} />
+          <BarChart />
         
         </header>
       </div>

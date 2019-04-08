@@ -78,12 +78,12 @@ class BarChart extends Component {
       svg.append('g')
           .attr('class', 'axis axis--x')
           .attr('transform', 'translate(0,' + height + ')')
-          .call(d3.axisBottom(x));
+          .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(0));
 
       //yAxis
       svg.append('g')
           .attr('class', 'axis axis--y')
-          .call(d3.axisLeft(y));
+          .call(d3.axisLeft(y).tickSizeOuter(0).tickSize(0));
     }
     
 
