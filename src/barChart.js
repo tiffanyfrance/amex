@@ -5,9 +5,9 @@ class BarChart extends Component {
 
   constructor(props) {
     super(props);
+
     this.chartRef = React.createRef();
     this.state = {
-      metric: 'price',
       data: null
     }
   }
@@ -28,10 +28,14 @@ class BarChart extends Component {
   }
 
   drawChart() {
+    let {data} = this.state;
+
+    if (!data) {
+      return;
+    }
+
     d3.select(this.chartRef.current)
         .select('svg').remove();
-
-    let {data} = this.state;
 
     const clientWidth = d3.select('body').node().getBoundingClientRect().width;
     const clientHeight = d3.select('body').node().getBoundingClientRect().height;
@@ -52,7 +56,7 @@ class BarChart extends Component {
       let x = d3.scaleLinear().range([0, (width - margin.right)]),
           y = d3.scaleBand().rangeRound([height, 0]).padding(0.1);
 
-      x.domain([0, d3.max(data, (d) => d[this.state.metric])]);
+      x.domain([0, d3.max(data, (d) => d[this.props.metric])]);
       y.domain(data.map((d) => d.item));
 
       buildAxes(x,y);
@@ -65,7 +69,7 @@ class BarChart extends Component {
         .attr('y', (d) => y(d.item))
         .attr('x', (d) => 0)
         .attr('height', y.bandwidth())
-        .attr('width', (d) => x(d[this.state.metric]))
+        .attr('width', (d) => x(d[this.props.metric]))
         .attr('fill', 'steelblue');
 
     } else {
@@ -74,7 +78,7 @@ class BarChart extends Component {
           y = d3.scaleLinear().rangeRound([height, 0]);
 
       x.domain(data.map((d) => d.item));
-      y.domain([0, d3.max(data, (d) => d[this.state.metric])]);
+      y.domain([0, d3.max(data, (d) => d[this.props.metric])]);
 
       buildAxes(x,y);
 
@@ -84,9 +88,9 @@ class BarChart extends Component {
         .append('rect')
         .attr('class', 'bar')
         .attr('x', (d) => x(d.item))
-        .attr('y', (d) => y(d[this.state.metric]))
+        .attr('y', (d) => y(d[this.props.metric]))
         .attr('width', x.bandwidth())
-        .attr('height', (d) => height - y(d[this.state.metric]))
+        .attr('height', (d) => height - y(d[this.props.metric]))
         .attr('fill', 'steelblue');
     }
 
@@ -105,23 +109,9 @@ class BarChart extends Component {
     }
   }
 
-  handleChange = (event) =>  {
-    console.log(event.target.value);
-    
-    this.setState({
-      metric: event.target.value
-    })
-  }
-
   render() {
     return (
-      <div ref={this.chartRef}>
-        <select className="metric-picker" onChange={this.handleChange} value={this.state.metric}>
-          <option value="price">Average unit price</option>
-          <option value="units">Units sold</option>
-          <option value="revenue">Revenue total</option>
-        </select>
-      </div>
+      <div ref={this.chartRef}></div>
     )
   }
 
