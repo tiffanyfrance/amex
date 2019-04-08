@@ -2,11 +2,23 @@ import React, {Component} from 'react';
 import * as d3 from 'd3';
 
 class BarChart extends Component {
+
+  constructor(props) {
+    super(props);
+    this.chartRef = React.createRef();
+  }
   
   componentDidMount() {
-    fetch('http://localhost:8080/getData')
-      .then((response) => response.json())
-      .then((data) => this.drawChart(data));
+    d3.json('http://localhost:8080/getData')
+      .then((data) => {
+        data.forEach((d) => {
+          d.price = +d['average unit price'].replace(/\$|,/g, '');
+          d.revenue = +d['revenue total'].replace(/\$|,/g, '');
+          d.units = +d['units sold'];  
+        });
+
+        this.drawChart(data)
+      });
   }
 
   drawChart(data) {
@@ -17,17 +29,12 @@ class BarChart extends Component {
           width = clientWidth - margin.left - margin.right,
           height = (clientHeight * 0.75) - margin.top - margin.bottom;
 
-    let svg = d3.select('#barChart')
+    let svg = d3.select(this.chartRef.current)
         .append('svg')
         .attr('width', width + margin.top + margin.bottom)
         .attr('height', height + margin.left + margin.right)
         .append('g')
         .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-    data.forEach((d) => {
-      d.price = +d['average unit price'].replace(/\$|,/g, '');
-      d.revenue = +d['revenue total'].replace(/\$|,/g, '');
-    });
 
     if (clientWidth < 700) {
       //horizontal view
@@ -85,53 +92,10 @@ class BarChart extends Component {
           .attr('class', 'axis axis--y')
           .call(d3.axisLeft(y).tickSizeOuter(0).tickSize(0));
     }
-    
-
-  // d3.tsv('data.tsv')
-  //   .then((data) => {
-  //       return data.map((d) => {
-  //         d.frequency = +d.frequency;
-
-  //         return d;  
-  //       });
-  //   })
-  //   .then((data) => {
-  //       x.domain(data.map(function(d) { return d.letter; }));
-  //       y.domain([0, d3.max(data, function(d) { return d.frequency; })]);
-
-  //       g.append('g')
-  //           .attr('class', 'axis axis--x')
-  //           .attr('transform', 'translate(0,' + height + ')')
-  //           .call(d3.axisBottom(x));
-
-  //       g.append('g')
-  //           .attr('class', 'axis axis--y')
-  //           .call(d3.axisLeft(y).ticks(10, '%'))
-  //         .append('text')
-  //           .attr('transform', 'rotate(-90)')
-  //           .attr('y', 6)
-  //           .attr('dy', '0.71em')
-  //           .attr('text-anchor', 'end')
-  //           .text('Frequency');
-
-  //       g.selectAll('.bar')
-  //         .data(data)
-  //         .enter().append('rect')
-  //           .attr('class', 'bar')
-  //           .attr('x', function(d) { return x(d.letter); })
-  //           .attr('y', function(d) { return y(d.frequency); })
-  //           .attr('width', x.bandwidth())
-  //           .attr('height', function(d) { return height - y(d.frequency); });
-  //   })
-  //   .catch((error) => {
-  //       throw error;
-  //   });
-
-  
   }
 
   render(){
-    return <div id='barChart'></div>
+    return <div ref={this.chartRef}></div>
   }
 
 }
