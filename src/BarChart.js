@@ -14,12 +14,12 @@ class BarChart extends Component {
   }
 
   updateDimensions = _.debounce(() => {
-    let clientWidth = d3.select('body').node().getBoundingClientRect().width;
-    let clientHeight = d3.select('body').node().getBoundingClientRect().height;
+    let clientWidth = d3.select('#viz').node().getBoundingClientRect().width;
+    let clientHeight = d3.select('#viz').node().getBoundingClientRect().height;
 
     let margin = {top: 30, right: 30, bottom: 30, left: 80};
     let width = clientWidth - margin.left - margin.right;
-    let height = (clientHeight * 0.75) - margin.top - margin.bottom;
+    let height = clientHeight - margin.top - margin.bottom;
 
     this.setState({
       clientWidth,
@@ -82,7 +82,7 @@ class BarChart extends Component {
     this.xAxis.attr('transform', 'translate(0,' + height + ')');
 
     if (clientWidth < 700) {
-      //horizontal view
+      //mobile view
       let x = d3.scaleLinear().range([0, (width - margin.right)]),
           y = d3.scaleBand().rangeRound([height, 0]).padding(0.1);
 
@@ -101,7 +101,7 @@ class BarChart extends Component {
         .attr('width', (d) => x(d[metric]));
 
     } else {
-      //default view
+      //desktop view
       let x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
           y = d3.scaleLinear().rangeRound([height, 0]);
 
@@ -123,10 +123,14 @@ class BarChart extends Component {
 
   updateAxes(x,y) {
     this.xAxis
-        .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(0));
+      .transition()
+      .duration(500)
+      .call(d3.axisBottom(x).tickSizeOuter(0).tickSize(0));
 
     this.yAxis
-        .call(d3.axisLeft(y).tickSizeOuter(0).tickSize(0));
+      .transition()
+      .duration(500)
+      .call(d3.axisLeft(y).tickSizeOuter(0).tickSize(0));
   }
 
   mergeBar(data) {

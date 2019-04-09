@@ -16,3 +16,9 @@
 .domain {
   display: none;
 }
+
+#viz {
+  width: 90%;
+  height: 75vh;
+  margin-top: 20px;
+}

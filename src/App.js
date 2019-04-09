@@ -28,7 +28,9 @@ class App extends Component {
 
           <MetricPicker onChange={this.metricChange} value={this.state.metric} />
           
-          <BarChart metric={this.state.metric} />
+          <div id="viz">
+            <BarChart metric={this.state.metric} />
+          </div>
         
         </header>
       </div>
