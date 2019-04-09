@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import _ from 'lodash';
 import * as d3 from 'd3';
 
 class BarChart extends Component {
@@ -10,6 +11,14 @@ class BarChart extends Component {
     this.state = {
       data: null
     }
+  }
+
+  updateDimensions = _.debounce(() => {
+    console.log(d3.select('body').node().getBoundingClientRect().width);
+  }, 500)
+
+  componentWillMount() {
+    this.updateDimensions();
   }
   
   componentDidMount() {
@@ -25,6 +34,8 @@ class BarChart extends Component {
           data
         });
       });
+
+    window.addEventListener('resize', this.updateDimensions);
 
     this.setupChart();
   }
@@ -127,6 +138,10 @@ class BarChart extends Component {
 
   componentDidUpdate() {
     this.drawChart();
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.updateDimensions)
   }
 }
 
