@@ -1,4 +1,4 @@
-Usage
+Run Instructions
 ------
 
 1. Open 2 terminals.
