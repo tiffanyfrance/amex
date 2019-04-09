@@ -14,8 +14,21 @@ class BarChart extends Component {
   }
 
   updateDimensions = _.debounce(() => {
-    console.log(d3.select('body').node().getBoundingClientRect().width);
-  }, 500)
+    let clientWidth = d3.select('body').node().getBoundingClientRect().width;
+    let clientHeight = d3.select('body').node().getBoundingClientRect().height;
+
+    let margin = {top: 30, right: 30, bottom: 30, left: 80};
+    let width = clientWidth - margin.left - margin.right;
+    let height = (clientHeight * 0.75) - margin.top - margin.bottom;
+
+    this.setState({
+      clientWidth,
+      clientHeight,
+      margin,
+      width,
+      height
+    });
+  }, 200)
 
   componentWillMount() {
     this.updateDimensions();
@@ -41,40 +54,37 @@ class BarChart extends Component {
   }
 
   setupChart() {
-    this.clientWidth = d3.select('body').node().getBoundingClientRect().width;
-    this.clientHeight = d3.select('body').node().getBoundingClientRect().height;
+    this.svg = d3.select(this.chartRef.current);
 
-    this.margin = {top: 30, right: 30, bottom: 30, left: 80};
-    this.width = this.clientWidth - this.margin.left - this.margin.right;
-    this.height = (this.clientHeight * 0.75) - this.margin.top - this.margin.bottom;
+    this.mainGroup = this.svg.append('g');
 
-    this.svg = d3.select(this.chartRef.current)
-        .attr('width', this.width + this.margin.top + this.margin.bottom)
-        .attr('height', this.height + this.margin.left + this.margin.right)
-        .append('g')
-        .attr('transform', 'translate(' + this.margin.left + ',' + this.margin.top + ')');
+    this.xAxis = this.mainGroup.append('g')
+        .attr('class', 'axis axis--x');
 
-    this.xAxis = this.svg.append('g')
-        .attr('class', 'axis axis--x')
-        .attr('transform', 'translate(0,' + this.height + ')');
-
-    this.yAxis = this.svg.append('g')
+    this.yAxis = this.mainGroup.append('g')
         .attr('class', 'axis axis--y');
   }
 
   drawChart() {
-    let {data} = this.state;
+    let { data, width, height, margin, clientWidth } = this.state;
+    let { metric } = this.props;
 
-    if (!data) {
+    if (!data || !margin) {
       return;
     }
 
-    let { metric } = this.props;
+    this.svg
+      .attr('width', width + margin.top + margin.bottom)
+      .attr('height', height + margin.left + margin.right);
 
-    if (this.clientWidth < 700) {
+    this.mainGroup.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    this.xAxis.attr('transform', 'translate(0,' + height + ')');
+
+    if (clientWidth < 700) {
       //horizontal view
-      let x = d3.scaleLinear().range([0, (this.width - this.margin.right)]),
-          y = d3.scaleBand().rangeRound([this.height, 0]).padding(0.1);
+      let x = d3.scaleLinear().range([0, (width - margin.right)]),
+          y = d3.scaleBand().rangeRound([height, 0]).padding(0.1);
 
       x.domain([0, d3.max(data, (d) => d[metric])]);
       y.domain(data.map((d) => d.item));
@@ -92,8 +102,8 @@ class BarChart extends Component {
 
     } else {
       //default view
-      let x = d3.scaleBand().rangeRound([0, this.width]).padding(0.1),
-          y = d3.scaleLinear().rangeRound([this.height, 0]);
+      let x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+          y = d3.scaleLinear().rangeRound([height, 0]);
 
       x.domain(data.map((d) => d.item));
       y.domain([0, d3.max(data, (d) => d[metric])]);
@@ -107,7 +117,7 @@ class BarChart extends Component {
         .attr('x', (d) => x(d.item))
         .attr('y', (d) => y(d[metric]))
         .attr('width', x.bandwidth())
-        .attr('height', (d) => this.height - y(d[metric]));
+        .attr('height', (d) => height - y(d[metric]));
     }
   }
 
@@ -120,7 +130,7 @@ class BarChart extends Component {
   }
 
   mergeBar(data) {
-    let bar = this.svg.selectAll('.bar')
+    let bar = this.mainGroup.selectAll('.bar')
         .data(data);
 
     let enterBar = bar.enter()
