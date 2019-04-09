@@ -1,15 +1,15 @@
-Open 2 terminals.
+Usage
+------
 
-In first terminal: 
-### `npm install`
-### `node server.js`
+1. Open 2 terminals.
 
-In second terminal:
-### `npm start`
+2. In first terminal: 
+  * `npm install`
+  * `node server.js`
 
-Point browser to: 
-### `http://localhost:3000/`
+3. In second terminal:
+  * `npm start`
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
+4. Point browser to:
+  `http://localhost:3000/`
 
