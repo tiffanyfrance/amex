@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import _ from 'lodash';
 import * as d3 from 'd3';
 
@@ -17,7 +17,7 @@ class BarChart extends Component {
     let clientWidth = d3.select('#viz').node().getBoundingClientRect().width;
     let clientHeight = d3.select('#viz').node().getBoundingClientRect().height;
 
-    let margin = {top: 30, right: 30, bottom: 30, left: 80};
+    let margin = { top: 30, right: 30, bottom: 30, left: 80 };
     let width = clientWidth - margin.left - margin.right;
     let height = clientHeight - margin.top - margin.bottom;
 
@@ -33,14 +33,14 @@ class BarChart extends Component {
   componentWillMount() {
     this.updateDimensions();
   }
-  
+
   componentDidMount() {
     d3.json('http://localhost:8080/getData')
       .then((data) => {
         data.forEach((d) => {
           d.price = +d['average unit price'].replace(/\$|,/g, '');
           d.revenue = +d['revenue total'].replace(/\$|,/g, '');
-          d.units = +d['units sold'];  
+          d.units = +d['units sold'];
         });
 
         this.setState({
@@ -59,10 +59,10 @@ class BarChart extends Component {
     this.mainGroup = this.svg.append('g');
 
     this.xAxis = this.mainGroup.append('g')
-        .attr('class', 'axis axis--x');
+      .attr('class', 'axis axis--x');
 
     this.yAxis = this.mainGroup.append('g')
-        .attr('class', 'axis axis--y');
+      .attr('class', 'axis axis--y');
   }
 
   drawChart() {
@@ -83,13 +83,15 @@ class BarChart extends Component {
 
     if (clientWidth < 700) {
       //mobile view
+      data.sort((a, b) => a[metric] - b[metric]);
+
       let x = d3.scaleLinear().range([0, (width - margin.right)]),
-          y = d3.scaleBand().rangeRound([height, 0]).padding(0.1);
+        y = d3.scaleBand().rangeRound([height, 0]).padding(0.1);
 
       x.domain([0, d3.max(data, (d) => d[metric])]);
       y.domain(data.map((d) => d.item));
 
-      this.updateAxes(x,y);
+      this.updateAxes(x, y);
 
       this.mergeBar(data)
         .attr('fill', 'steelblue')
@@ -99,16 +101,17 @@ class BarChart extends Component {
         .attr('x', (d) => 0)
         .attr('height', y.bandwidth())
         .attr('width', (d) => x(d[metric]));
-
     } else {
       //desktop view
-      let x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
-          y = d3.scaleLinear().rangeRound([height, 0]);
+      data.sort((a, b) => b[metric] - a[metric]);
 
-      x.domain(data.map((d) => d.item));
+      let x = d3.scaleBand().rangeRound([0, width]).padding(0.1),
+        y = d3.scaleLinear().rangeRound([height, 0]);
+
+      x.domain(data.map(d => d.item));
       y.domain([0, d3.max(data, (d) => d[metric])]);
 
-      this.updateAxes(x,y);
+      this.updateAxes(x, y);
 
       this.mergeBar(data)
         .attr('fill', 'steelblue')
@@ -121,7 +124,7 @@ class BarChart extends Component {
     }
   }
 
-  updateAxes(x,y) {
+  updateAxes(x, y) {
     this.xAxis
       .transition()
       .duration(500)
@@ -135,7 +138,7 @@ class BarChart extends Component {
 
   mergeBar(data) {
     let bar = this.mainGroup.selectAll('.bar')
-        .data(data);
+      .data(data, d => d.item);
 
     let enterBar = bar.enter()
       .append('rect')
